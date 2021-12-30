@@ -75,7 +75,15 @@ object_name_in_gcs_bucket = bucket.blob('hubspot_clients.csv')
 object_name_in_gcs_bucket.upload_from_filename('hubspot_clients.csv')
  
 #a= client.companies.get_recently_created(since='20210-10-01')
- 
+all_owners = client.owners.get_owners()
+owners_df=pd.DataFrame(all_owners)
+bitesResult = owners_df
+bitesResult.to_csv('hubspot_owners.csv', encoding='utf-8')
+
+bucket = gs_client.get_bucket(bucket_name) 
+object_name_in_gcs_bucket = bucket.blob('hubspot_owners.csv') 
+object_name_in_gcs_bucket.upload_from_filename('hubspot_owners.csv')
+##
 all_deals= client.deals.get_all()
 deals_df=pd.DataFrame(all_deals) 
 
@@ -145,36 +153,243 @@ all_contacts=a
 # Handle errors while calling os.remove()
 
 try:
+
+
     os.remove('freemium_ext.csv')  
 except:
     pass
 
+
+
 with open('freemium_ext.csv','w') as result_file:
    
-    result_file.write("vid,trial_plan_type,email,company"+"\n")
+    result_file.write("vid,company,email,trial_plan_type,company_id,company_name,portal_id,bites_username,company_came_from_free_trial,company_createdate,company_first_contact_createdate,
+organization_id,organization_name,u_trial_status,u_trial_start_date,u_trial_plan_type,u_trial_days,u_qualification_steps,u_pql___sql,u_phone,u_original_owner,u_original_marketing_score,u_
+organization_id,u_lastname,u_hubspot_owner_id,u_hubspot_owner_assigneddate,u_free_trial_contact,u_firstname,u_email,u_currentlyinworkflow,u_createdate,u_create_trial,u_contact_score,u_com
+pany,u_associatedcompanyid,u_access_code,hs_analytics_source_data_1,hs_analytics_source_data_2,hs_analytics_source,ga_pseudo_user_id"+"\n")
     for index in range  ( len(all_contacts)):
         rownum=all_contacts[index]['vid']
         contact_data = client.contacts.get_by_id(all_contacts[index]['vid'], params=params)
-                 
+       
+            
         try:
             company=contact_data['properties']['company']['value']
         except KeyError:
-                continue    
+                company=''    
         try:
             email=contact_data['properties']['email']['value']
         except KeyError:
-                continue
+                email=''
         try:
             trial_plan_type=contact_data['properties']['trial_plan_type']['value']
         except KeyError:
+                trial_plan_type=''
+        try:
+            company_id=(contact_data['associated-company']['company-id'])
+        except KeyError:
+                company_id=''
+        try:
+            company_name=(contact_data['associated-company']['properties']['name']['value']) 
+        except KeyError:
+                company_name=''                      
+        try:
+            portal_id=(contact_data['associated-company']['portal-id'])
+        except KeyError:
+                portal_id=''
+        
+        try:
+            bites_username=(contact_data['associated-company']['properties']['bites_username']['value'])
+        except KeyError:
+                bites_username=''
+        try:
+            company_came_from_free_trial=(contact_data['associated-company']['properties']['came_from_free_trial']['value'])
+        except KeyError:
+                company_came_from_free_trial=''
+        try:
+            company_createdate=(date.fromtimestamp( int( contact_data['associated-company']['properties']['createdate']['value']) /1000))    
+        
+        except KeyError:
+                company_createdate=''
+        try:
+            company_first_contact_createdate=(date.fromtimestamp( int( contact_data['associated-company']['properties']['first_contact_createdate']['value']) /1000))      
+        except KeyError:
+                company_first_contact_createdate=''
+        try:
+            organization_id=(contact_data['associated-company']['properties']['organization_id']['value'])
+        except KeyError:
+                organization_id=''
+        try:
+            organization_name=(contact_data['associated-company']['properties']['organization_name']['value']) 
+        except KeyError:
+                organization_name=''    
+        
+        
+        try: 
+            u_access_code=(contact_data['properties']['access_code']['value']) 
+        except KeyError:
+            u_access_code=''
+        try:
+            u_associatedcompanyid=(contact_data['properties']['associatedcompanyid']['value']) 
+        except KeyError:
+             u_associatedcompanyid=''
+        try:
+            u_company=(contact_data['properties']['company']['value']) 
+        except KeyError:
+            u_company=''  
+        try:
+            u_contact_score=(contact_data['properties']['contact_score']['value']) 
+        except KeyError:
+            u_contact_score=''
+        try:
+            u_create_trial=(contact_data['properties']['create_trial']['value']) 
+        except KeyError:
+            u_create_trial='' 
+        try:
+            u_createdate=date.fromtimestamp( int( contact_data['properties']['createdate']['value']) /1000 )    
+        except KeyError:
+            u_createdate=''
+        try:
+            u_currentlyinworkflow=(contact_data['properties']['currentlyinworkflow']['value']) 
+        except KeyError:
+            u_currentlyinworkflow='' 
+        try:
+            u_email=(contact_data['properties']['email']['value']) 
+        except KeyError:
+            u_email=''  
+        try:
+            u_firstname=(contact_data['properties']['firstname']['value']) 
+        except KeyError:
+            u_firstname=''
+        try:
+            u_lastname=(contact_data['properties']['lastname']['value']) 
+        except KeyError:
+            u_lastname==''             
+        try:
+            u_free_trial_contact=(contact_data['properties']['free_trial_contact']['value']) 
+        except KeyError:
+            u_free_trial_contact='' 
+        try:
+            u_organization_id=(contact_data['properties']['organization_id']['value']) 
+        except KeyError:
+            u_organization_id=''  
+        try:
+            u_original_marketing_score=(contact_data['properties']['original_marketing_score']['value']) 
+        except KeyError:
+            u_original_marketing_score=''
+        try:
+            u_original_owner=(contact_data['properties']['original_owner']['value']) 
+        except KeyError:
+            u_original_owner=''
+        try:
+            u_phone=(contact_data['properties']['phone']['value']) 
+        except KeyError:
+            u_phone='' 
+        try:
+            u_pql___sql=(contact_data['properties']['pql___sql']['value']) 
+        except KeyError:
+            u_pql___sql=''  
+        try:
+            u_qualification_steps=(contact_data['properties']['qualification_steps']['value']) 
+        except KeyError:
+            u_qualification_steps=''  
+        try:
+            u_trial_days=(contact_data['properties']['trial_days']['value']) 
+        except KeyError:
+            u_trial_days=''  
+        try:
+            u_trial_plan_type=(contact_data['properties']['trial_plan_type']['value']) 
+        except KeyError:
+            u_trial_plan_type=''  
+        try:
+            u_trial_start_date=(date.fromtimestamp( int( contact_data['properties']['trial_start_date']['value']) /1000))    
+        except KeyError:
+            u_trial_start_date=''  
+        try:
+            u_trial_status=(contact_data['properties']['trial_status']['value'])     
+        except KeyError:
+            u_trial_status=''  
+        try:
+            u_hubspot_owner_assigneddate=date.fromtimestamp( int(contact_data['properties']['hubspot_owner_assigneddate']['value'])/1000)      
+        except KeyError:
+            u_hubspot_owner_assigneddate='' 
+        try:
+            u_hubspot_owner_id=(contact_data['properties']['hubspot_owner_id']['value'])  
+        except KeyError:
+            u_hubspot_owner_id=''
+        try:
+            hs_analytics_source_data_1=(contact_data['properties']['hs_analytics_source_data_1']['value'])
+        except KeyError:
+            hs_analytics_source_data_1=''
+        try:
+            hs_analytics_source_data_2=(contact_data['properties']['hs_analytics_source_data_2']['value'])
+        except KeyError:
+            hs_analytics_source_data_2=''
+        try:
+            hs_analytics_source=(contact_data['properties']['hs_analytics_source']['value'])
+        except KeyError:
+            hs_analytics_source=''
+        try:
+            ga_pseudo_user_id=(contact_data['properties']['ga_pseudo_user_id']['value'])
+        except KeyError:
+            ga_pseudo_user_id=''
+
+        #onboarding_conversation__freemium_    
+                    
+        
+        try:
+            result_file.write(str(rownum)+
+            ","+"\""+company+"\""+
+            "," +email+
+            ","+trial_plan_type+
+            ","+ str(company_id) + 
+            ", " +"\""+company_name +"\""+
+            ","+str(portal_id)+
+            ","+bites_username+
+            ","+company_came_from_free_trial+
+            ","+str(company_createdate)+
+            ","+str(company_first_contact_createdate) +
+            ","+str(organization_id) +
+            ","+"\""+organization_name+"\""+
+            ","+	u_trial_status	+
+            ","+str(	u_trial_start_date)	+
+            ","+	u_trial_plan_type+
+            ","+str(u_trial_days)+
+            ","+	u_qualification_steps+
+            ","+	u_pql___sql	+
+            ","+str(u_phone)+
+            ","+	u_original_owner+
+            ","+	u_original_marketing_score+
+            ","+	u_organization_id+
+            ","+	u_lastname+ 
+            ","+	u_hubspot_owner_id+
+            ","+str(u_hubspot_owner_assigneddate)+
+            ","+	u_free_trial_contact+
+            ","+	u_firstname+
+            ","+	u_email+
+            ","+	u_currentlyinworkflow+
+            ","+str(	u_createdate)+
+            ","+	u_create_trial+
+            ","+	u_contact_score+
+            ","+"\""+	u_company+"\""+
+            ","+	u_associatedcompanyid+	
+            ","+        u_access_code+
+            ","+        hs_analytics_source_data_1+
+            ","+        hs_analytics_source_data_2+
+            ","+        hs_analytics_source+
+            ","+        ga_pseudo_user_id+
+            ","+                    "\n")
+        except KeyError:
                 continue
+
+result_file.close()
+"""
         try:
             result_file.write(str(rownum)+","+trial_plan_type+","+email+","+company+"\n")
         except KeyError:
                 continue
                    
 result_file.close()
-
+"""
 bucket = gs_client.get_bucket(bucket_name)
 object_name_in_gcs_bucket = bucket.blob('freemium_ext.csv')
 object_name_in_gcs_bucket.upload_from_filename('freemium_ext.csv')
@@ -189,7 +404,7 @@ except:
     pass
 
 with open('companies_extra_ext.csv','w') as result_file:
-    result_file.write("id,name,website,bite_share_id,bites_username,came_from_free_trial,organization_id,organization_name"+"\n") 
+    result_file.write("id,organization_name,organization_id,company,bite_share_id,bites_username,came_from_free_trial,website"+"\n") 
  
     for index in range  ( len(all_companies)):
             rownum=all_companies[index]['id']
@@ -224,7 +439,11 @@ with open('companies_extra_ext.csv','w') as result_file:
             except KeyError:
                     organization_name=''
             try:
-                result_file.write(str(rownum)+","+organization_name+","+organization_id+"," +  '"'+company+'"' + ","+ '"'+bite_share_id+'"' +  "," + '"'+bites_username+'"'  +"," +   '"'+came_from_free_trial+'"' +  "," +  '"'+website+'"' +"\n") 
+                result_file.write(str(rownum)+ "," + "\""+organization_name+"\"" + ","+organization_id+"," +   "\""+company+"\""+  ","+ '"'+bite_share_id+'"' +  "," + '"'+bites_username+'
+"'  +"," +   "\""+came_from_free_trial+"\""+  "," + "\""+website+"\"" +"\n")
+
+                #result_file.write(str(rownum)+","+organization_name+","+organization_id+"," +  '"'+company+'"' + ","+ '"'+bite_share_id+'"' +  "," + '"'+bites_username+'"'  +"," +   '"'+
+came_from_free_trial+'"' +  "," +  '"'+website+'"' +"\n") 
             
             except KeyError:
                   continue
